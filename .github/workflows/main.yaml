@@ -19,9 +19,9 @@ jobs:
       - uses: actions/checkout@v3
 
       # AWS 認証
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: "us-west-1"
+          aws-region: "us-east-1"
           role-to-assume: "arn:aws:iam::601427279990:role/kihara-github-actions-ecr-push-role"
 
       # ECR ログイン
@@ -34,7 +34,7 @@ jobs:
           # ECR レジストリを `aws-actions/amazon-ecr-login` アクションの `outputs.registry` から取得
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           # イメージを push する ECR リポジトリ名
-          REPOSITORY: "emailservice"
+          REPOSITORY: "kihara/emailservice"
           # 任意のイメージタグ
           # 今回は Git のコミットハッシュにしておく
           IMAGE_TAG: ${{ github.sha }}
