@@ -58,4 +58,5 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
           kubectl version
+          kubectl config current-context
           kubectl apply -f manifests/emailservice.yaml
