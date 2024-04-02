@@ -37,7 +37,7 @@ jobs:
           REPOSITORY: "emailservice"
           # 任意のイメージタグ
           # 今回は Git のコミットハッシュにしておく
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: latest #${{ github.sha }}
         run: |
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
@@ -63,4 +63,4 @@ jobs:
       - name: Update KUBECONFIG
         run: aws eks update-kubeconfig --name dd-demo-eks-kihara
       - name: Deploy to EKS
-        run: kubectl apply -k manifest
+        run: kubectl apply -k manifests
