@@ -47,7 +47,12 @@ jobs:
 
       - name: Update kube config
         run: aws eks update-kubeconfig --name dd-demo-eks-kihara --region us-east-1
-
+      
+      # AWS 認証
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: "us-east-1"
+          role-to-assume: "arn:aws:iam::601427279990:role/dd-demo-eks-kihara-cluster-20240401070316771500000001"
       - name: Deploy to EKS
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}        
