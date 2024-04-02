@@ -53,10 +53,5 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}        
           IMAGE_TAG: ${{ steps.commit.outputs.short }}
         run: |
-          kubectl version
-          curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl
-          chmod +x ./kubectl
-          sudo mv ./kubectl /usr/local/bin/kubectl
-          kubectl version
-          kubectl config current-context
+          sed -i.bak "s|DOCKER_IMAGE|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|g" manifests/emailservice.yaml && \
           kubectl apply -f manifests/emailservice.yaml
