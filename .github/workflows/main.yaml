@@ -63,4 +63,4 @@ jobs:
       - name: Update KUBECONFIG
         run: aws eks update-kubeconfig --name dd-demo-eks-kihara
       - name: Deploy to EKS
-        run: kubectl apply -k manifests
+        run: kubectl apply manifests
