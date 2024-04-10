@@ -14,8 +14,8 @@ env:
   ECR_REPOSITORY: b1o7r7e0/emailservice           # set this to your Amazon ECR repository name
 
 jobs:
-  build:
-    name: Deployment
+  push:
+    name: Push Image to ECR
     runs-on: ubuntu-latest
     # `permissions` を設定しないと OIDC が使えないので注意
     permissions:
