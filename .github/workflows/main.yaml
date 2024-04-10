@@ -9,6 +9,9 @@ on:
       - 'feature/**'
     # paths
     #   - 'src/**' # srcディレクトリ以下のファイルに変更があった場合に実行
+env:
+  AWS_REGION: us-east-1                   # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: b1o7r7e0/emailservice           # set this to your Amazon ECR repository name
 
 jobs:
   build:
@@ -28,8 +31,11 @@ jobs:
           role-to-assume: "arn:aws:iam::601427279990:role/kihara-github-actions-ecr-push-role"
 
       # ECR ログイン
-      - uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
         id: login-ecr # outputs で参照するために id を設定
+        with:
+          registry-type: public
 
       # Docker イメージを build・push する
       - name: build and push docker image to ecr
@@ -40,22 +46,7 @@ jobs:
           REPOSITORY: "emailservice"
           # 任意のイメージタグ
           # 今回は Git のコミットハッシュにしておく
-          IMAGE_TAG: latest #${{ github.sha }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
-
-      - name: Update kube config
-        run: aws eks update-kubeconfig --name dd-demo-eks-kihara --region us-east-1
-      
-      # AWS 認証
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: "us-east-1"
-          role-to-assume: "arn:aws:iam::601427279990:role/dd-demo-eks-kihara-cluster-20240401070316771500000001"
-      - name: Deploy to EKS
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}        
-          IMAGE_TAG: ${{ steps.commit.outputs.short }}
-        run: |
-          kubectl apply -f emailservice.yaml --validate=false
