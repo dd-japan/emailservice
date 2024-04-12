@@ -46,7 +46,7 @@ jobs:
           REPOSITORY: "b1o7r7e0/emailservice"
           # 任意のイメージタグ
           # 今回は Git のコミットハッシュにしておく
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: latest #${{ github.sha }}
         run: |
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
