@@ -12,6 +12,9 @@ on:
 env:
   AWS_REGION: us-east-1                   # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: b1o7r7e0/emailservice           # set this to your Amazon ECR repository name
+  HOME: /home/runner/work/emailservice-manifest/emailservice-manifest
+  REPO: emailservice-manifest
+  GIT_USERNAME: dd-japan
 
 jobs:
   push:
@@ -23,10 +26,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
-    
-      # - name: Fetch Git tags
-      #   run: |
-      #     git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       # AWS 認証
       - uses: aws-actions/configure-aws-credentials@v4
@@ -41,32 +40,6 @@ jobs:
         with:
           registry-type: public
 
-      - name: Get current version
-        id: get_version
-        run: |
-          CURRENT_VERSION=$(git tag --sort=-version:refname | head -n 1)
-          echo "Current version: $CURRENT_VERSION"
-          echo "::set-output name=CURRENT_VERSION::$CURRENT_VERSION"
-
-      - name: Bump patch version
-        id: bump_version
-        run: |
-          CURRENT_VERSION="${{ steps.get_version.outputs.CURRENT_VERSION }}"
-          PATCH_VERSION=$(echo $CURRENT_VERSION | awk -F. '{print $3}')
-          NEW_PATCH_VERSION=$((PATCH_VERSION + 1))
-          NEW_VERSION=$(echo $CURRENT_VERSION | sed "s/\.[0-9]*$/.${NEW_PATCH_VERSION}/")
-          echo "New version: $NEW_VERSION"
-          echo "::set-output name=NEW_VERSION::$NEW_VERSION"
-      
-        # - name: Build and push Docker image
-        # uses: docker/build-push-action@v2
-        # with:
-        #   context: ./app
-        #   push: true
-        #   tags: |
-        #     your.container.registry/your-app:latest
-        #     your.container.registr/your-app:${{ steps.bump_version.outputs.NEW_VERSION }}
-
       # Docker イメージを build・push する
       - name: build and push docker image to ecr
         env:
@@ -78,30 +51,50 @@ jobs:
           # 今回は Git のコミットハッシュにしておく
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
-          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
-      
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v1
+          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+  
+  github:
+    needs: push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: dd-japan/emailservice-manifest
-          event-type: update-yml
-          client-payload: '{"ref": "${{ env.GITHUB_REF }}"}'
+          repository: ${{ env.GIT_USERNAME }}/${{ env.REPO }}
+          path: ${{ env.REPO }}
+          ref: main
+      
+      - name: Git config
+        env:
+          GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
+        run: |
+          cd ${{ env.HOME }}/${{ env.REPO }}
+          git config user.name ${{ env.GIT_USERNAME }}
+          git config user.email ${{ secrets.GIT_EMAIL }}
+          git remote set-url origin git@github.com:${{ env.GIT_USERNAME }}/${{ env.REPO }}.git
+          echo "$GIT_DEPLOY_KEY" > ~/deploy_key.pem
+          chmod 600 ~/deploy_key.pem
 
-      # - name: Commit and push changes
+      # - name: Create a new branch
       #   run: |
-      #     git config user.name "GitHub Actions Bot"
-      #     git config user.email "actions@github.com"
-      #     git -A
-      #     git status
-      #     git commit -m "Update image tag to ${{ steps.bump_version.outputs.NEW_VERSION }}"
-      #     git tag ${{ steps.bump_version.outputs.NEW_VERSION }}
-      #     git push origin --tags
-      #     git switch -c release
-      #     git push origin release --force
-
-        # - name: Update Deployment and Application manifests
-        # run: |
-        #   NEW_VERSION="${{ steps.bump_version.outputs.NEW_VERSION }}"
-        #   sed -i "s/b1o7r7e0/emailservice:v[0-9]*\.[0-9]*\.[0-9]*/b1o7r7e0/emailservice:$NEW_VERSION/g" manifests/emailservice.yaml
+      #     cd ${{ env.HOME }}/${{ env.REPO }}
+      #     git switch -c deploy/${{ github.sha }}
+      
+      - name: Update emailservice manifest
+        run: | 
+          cd ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest/emailservice.yaml
+          sed -i -e 's|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:.*|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:${{ github.sha }}|' emailservice.yaml
+          cat emailservice.yaml
+          
+      - name: Add, Commit and Push
+        env:
+          GIT_SSH_COMMAND: ssh -i ~/deploy_key.pem -o StrictHostKeyChecking=no -F /dev/null
+        run: | 
+          cd ${{ env.HOME }}/${{ env.REPO }}
+          git remote -v
+          git branch
+          git status
+          git add ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest/emailservice.yaml
+          git commit -m "Updated manifests for the commit https://github.com/dd-japan/emailservice-manifest/commit/${{ github.sha }}"
+          git push origin deploy/${{ github.sha }}
