@@ -12,7 +12,7 @@ on:
 env:
   AWS_REGION: us-east-1                   # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: b1o7r7e0/emailservice           # set this to your Amazon ECR repository name
-  HOME: /home/runner/work/emailservice-manifest/emailservice-manifest
+  HOME: /home/runner/work/emailservice-manifest
   REPO: emailservice-manifest
   GIT_USERNAME: dd-japan
   EMAIL: k.kyuta.821@gmail.com
