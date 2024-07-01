@@ -12,7 +12,7 @@ on:
 env:
   AWS_REGION: us-east-1                   # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: b1o7r7e0/emailservice           # set this to your Amazon ECR repository name
-  HOME: /home/runner/work/emailservice-manifest
+  HOME: /home/runner/work/emailservice/emailservice
   REPO: emailservice-manifest
   GIT_USERNAME: dd-japan
   EMAIL: k.kyuta.821@gmail.com
@@ -70,6 +70,7 @@ jobs:
         env:
           GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
         run: |
+          pwd
           cd ${{ env.HOME }}/${{ env.REPO }}
           git config user.name ${{ env.GIT_USERNAME }}
           git config user.email ${{ env.EMAIL }}
@@ -97,5 +98,5 @@ jobs:
           git branch
           git status
           git add ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest/emailservice.yaml
-          git commit -m "Updated manifests for the commit https://github.com/dd-japan/emailservice-manifest/commit/${{ github.sha }}"
+          git commit -m "Updated manifests for the commit https://github.com/dd-japan/emailservice/commit/${{ github.sha }}"
           git push origin deploy/${{ github.sha }}
