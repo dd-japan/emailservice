@@ -27,14 +27,6 @@ jobs:
       - name: Fetch Git tags
         run: |
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-      
-      - name: Repository Dispatch
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: dd-japan/emailservice-manifest
-          event-type: update-yml
-          client-payload: '{"ref": "${{ env.GITHUB_REF }}"}'
 
       # AWS 認証
       - uses: aws-actions/configure-aws-credentials@v4
@@ -88,20 +80,28 @@ jobs:
         run: |
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
+      
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: dd-japan/emailservice-manifest
+          event-type: update-yml
+          client-payload: '{"ref": "${{ env.GITHUB_REF }}"}'
+          
+      # - name: Commit and push changes
+      #   run: |
+      #     git config user.name "GitHub Actions Bot"
+      #     git config user.email "actions@github.com"
+      #     git -A
+      #     git status
+      #     git commit -m "Update image tag to ${{ steps.bump_version.outputs.NEW_VERSION }}"
+      #     git tag ${{ steps.bump_version.outputs.NEW_VERSION }}
+      #     git push origin --tags
+      #     git switch -c release
+      #     git push origin release --force
 
-      - name: Commit and Push Changes
-        run: |
-          git config user.name "GitHub Actions Bot"
-          git config user.email "actions@github.com"
-          git -A
-          git status
-          git commit -m "Update image tag to ${{ steps.bump_version.outputs.NEW_VERSION }}"
-          git tag ${{ steps.bump_version.outputs.NEW_VERSION }}
-          git push origin --tags
-          git switch -c release
-          git push origin release --force
-
-        - name: Update Deployment and Application manifests
-        run: |
-          NEW_VERSION="${{ steps.bump_version.outputs.NEW_VERSION }}"
-          sed -i "s/b1o7r7e0/emailservice:v[0-9]*\.[0-9]*\.[0-9]*/b1o7r7e0/emailservice:$NEW_VERSION/g" manifests/emailservice.yaml
+        # - name: Update Deployment and Application manifests
+        # run: |
+        #   NEW_VERSION="${{ steps.bump_version.outputs.NEW_VERSION }}"
+        #   sed -i "s/b1o7r7e0/emailservice:v[0-9]*\.[0-9]*\.[0-9]*/b1o7r7e0/emailservice:$NEW_VERSION/g" manifests/emailservice.yaml
