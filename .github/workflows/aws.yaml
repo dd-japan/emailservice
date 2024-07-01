@@ -15,6 +15,7 @@ env:
   HOME: /home/runner/work/emailservice/emailservice
   REPO: emailservice-manifest
   GIT_USERNAME: dd-japan
+  EMAIL: k.kyuta.821@gmail.com
 
 jobs:
   push:
@@ -71,7 +72,7 @@ jobs:
         run: |
           cd ${{ env.HOME }}/${{ env.REPO }}
           git config user.name ${{ env.GIT_USERNAME }}
-          git config user.email ${{ secrets.GIT_EMAIL }}
+          git config user.email ${{ env.EMAIL }}
           git remote set-url origin git@github.com:${{ env.GIT_USERNAME }}/${{ env.REPO }}.git
           echo "$GIT_DEPLOY_KEY" > ~/deploy_key.pem
           chmod 600 ~/deploy_key.pem
