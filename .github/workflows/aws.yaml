@@ -88,8 +88,8 @@ jobs:
         run: |
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
-      
-      - name: Commit and push changes
+
+      - name: Commit and Push Changes
         run: |
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
