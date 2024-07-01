@@ -23,13 +23,10 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
-      - name: Fetch Git tags
+    
+    - name: Fetch Git tags
         run: |
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-      
-      - name: Set Env
-        run: |
-          echo "GITHUB_REF=${{ github.ref_name }}" >> $GITHUB_ENV
       
       - name: Repository Dispatch
       uses: peter-evans/repository-dispatch@v1
