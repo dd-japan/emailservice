@@ -85,7 +85,7 @@ jobs:
       
       - name: Update emailservice manifest
         run: | 
-          cd ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest/emailservice.yaml
+          cd ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest
           sed -i -e 's|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:.*|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:${{ github.sha }}|' emailservice.yaml
           cat emailservice.yaml
           
