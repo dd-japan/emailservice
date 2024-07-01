@@ -24,17 +24,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
     
-    - name: Fetch Git tags
-        run: |
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Fetch Git tags
+          run: |
+            git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       
       - name: Repository Dispatch
-      uses: peter-evans/repository-dispatch@v1
-      with:
-        token: ${{ secrets.REPO_ACCESS_TOKEN }}
-        repository: dd-japan/emailservice-manifest
-        event-type: update-yml
-        client-payload: '{"ref": "${{ env.GITHUB_REF }}"}'
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: dd-japan/emailservice-manifest
+          event-type: update-yml
+          client-payload: '{"ref": "${{ env.GITHUB_REF }}"}'
 
       # AWS 認証
       - uses: aws-actions/configure-aws-credentials@v4
