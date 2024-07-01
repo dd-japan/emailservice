@@ -23,6 +23,21 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v3
+      - name: Fetch Git tags
+        run: |
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      
+      - name: Set Env
+        run: |
+          echo "GITHUB_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+      
+      - name: Repository Dispatch
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: dd-japan/emailservice-manifest
+        event-type: update-yml
+        client-payload: '{"ref": "${{ env.GITHUB_REF }}"}'
 
       # AWS 認証
       - uses: aws-actions/configure-aws-credentials@v4
@@ -37,6 +52,32 @@ jobs:
         with:
           registry-type: public
 
+      - name: Get current version
+        id: get_version
+        run: |
+          CURRENT_VERSION=$(git tag --sort=-version:refname | head -n 1)
+          echo "Current version: $CURRENT_VERSION"
+          echo "::set-output name=CURRENT_VERSION::$CURRENT_VERSION"
+
+      - name: Bump patch version
+        id: bump_version
+        run: |
+          CURRENT_VERSION="${{ steps.get_version.outputs.CURRENT_VERSION }}"
+          PATCH_VERSION=$(echo $CURRENT_VERSION | awk -F. '{print $3}')
+          NEW_PATCH_VERSION=$((PATCH_VERSION + 1))
+          NEW_VERSION=$(echo $CURRENT_VERSION | sed "s/\.[0-9]*$/.${NEW_PATCH_VERSION}/")
+          echo "New version: $NEW_VERSION"
+          echo "::set-output name=NEW_VERSION::$NEW_VERSION"
+      
+        # - name: Build and push Docker image
+        # uses: docker/build-push-action@v2
+        # with:
+        #   context: ./app
+        #   push: true
+        #   tags: |
+        #     your.container.registry/your-app:latest
+        #     your.container.registr/your-app:${{ steps.bump_version.outputs.NEW_VERSION }}
+
       # Docker イメージを build・push する
       - name: build and push docker image to ecr
         env:
@@ -46,7 +87,24 @@ jobs:
           REPOSITORY: "b1o7r7e0/emailservice"
           # 任意のイメージタグ
           # 今回は Git のコミットハッシュにしておく
-          IMAGE_TAG: latest #${{ github.sha }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
-          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ steps.bump_version.outputs.NEW_VERSION }}
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          git -A
+          git status
+          git commit -m "Update image tag to ${{ steps.bump_version.outputs.NEW_VERSION }}"
+          git tag ${{ steps.bump_version.outputs.NEW_VERSION }}
+          git push origin --tags
+          git switch -c release
+          git push origin release --force
+
+        - name: Update Deployment and Application manifests
+        run: |
+          NEW_VERSION="${{ steps.bump_version.outputs.NEW_VERSION }}"
+          sed -i "s/b1o7r7e0/emailservice:v[0-9]*\.[0-9]*\.[0-9]*/b1o7r7e0/emailservice:$NEW_VERSION/g" manifests/emailservice.yaml
