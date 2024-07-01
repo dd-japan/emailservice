@@ -99,4 +99,4 @@ jobs:
           git status
           git add ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest/emailservice.yaml
           git commit -m "Updated manifests for the commit https://github.com/dd-japan/emailservice/commit/${{ github.sha }}"
-          git push origin deploy/main
+          git push origin main
