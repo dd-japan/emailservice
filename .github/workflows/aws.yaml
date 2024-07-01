@@ -24,9 +24,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
     
-      - name: Fetch Git tags
-        run: |
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      # - name: Fetch Git tags
+      #   run: |
+      #     git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       # AWS 認証
       - uses: aws-actions/configure-aws-credentials@v4
@@ -88,7 +88,7 @@ jobs:
           repository: dd-japan/emailservice-manifest
           event-type: update-yml
           client-payload: '{"ref": "${{ env.GITHUB_REF }}"}'
-          
+
       # - name: Commit and push changes
       #   run: |
       #     git config user.name "GitHub Actions Bot"
