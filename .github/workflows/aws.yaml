@@ -64,7 +64,7 @@ jobs:
         with:
           repository: ${{ env.GIT_USERNAME }}/${{ env.REPO }}
           path: ${{ env.REPO }}
-          ref: master
+          ref: main
       
       - name: Git config
         env:
