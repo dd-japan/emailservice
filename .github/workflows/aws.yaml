@@ -70,7 +70,6 @@ jobs:
         env:
           GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
         run: |
-          pwd
           cd ${{ env.HOME }}/${{ env.REPO }}
           git config user.name ${{ env.GIT_USERNAME }}
           git config user.email ${{ env.EMAIL }}
