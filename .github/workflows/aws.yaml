@@ -86,7 +86,7 @@ jobs:
       #     cd ${{ env.HOME }}/${{ env.REPO }}
       #     git switch -c deploy/${{ github.sha }}
 
-
+      # Checkout to manifest repo
       - name: Checkout Kubernetes manifests repo
         uses: actions/checkout@v3
         with:
@@ -100,7 +100,7 @@ jobs:
           cd ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest
           sed -i -e 's|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:.*|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:${{ github.sha }}|' emailservice.yaml
           cat emailservice.yaml
-          
+      
       - name: Commit and push changes
         working-directory: emailservice-manifest
         run: |
