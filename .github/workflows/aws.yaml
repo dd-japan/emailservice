@@ -101,14 +101,12 @@ jobs:
           sed -i -e 's|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:.*|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:${{ github.sha }}|' emailservice.yaml
           cat emailservice.yaml
           
-      - name: Add, Commit and Push
-        env:
-          GIT_SSH_COMMAND: ssh -i ~/deploy_key.pem -o StrictHostKeyChecking=no -F /dev/null
-        run: | 
-          cd ${{ env.HOME }}/${{ env.REPO }}
-          git remote -v
-          git branch
-          git status
-          git add ${{ env.HOME }}/${{ env.REPO }}/emailservice/manifest/emailservice.yaml
-          git commit -m "Updated manifests for the commit https://github.com/dd-japan/emailservice/commit/${{ github.sha }}"
-          git push origin main
+      - name: Commit and push changes
+        working-directory: emailservice-manifest
+        run: |
+            git config user.name "GitHub Actions Bot"
+            git config user.email "actions@github.com"
+            git add manifest/emailservice.yaml
+            git status
+            git commit -m "Update image to public.ecr.aws/b1o7r7e0/emailservice:${{ env.IMAGE_TAG }}"
+            git push origin master
