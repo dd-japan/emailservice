@@ -17,6 +17,10 @@ env:
   GIT_USERNAME: dd-japan
   EMAIL: k.kyuta.821@gmail.com
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   push:
     name: Push Image to ECR
@@ -66,21 +70,30 @@ jobs:
           path: ${{ env.REPO }}
           ref: main
       
-      - name: Git config
-        env:
-          GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
-        run: |
-          cd ${{ env.HOME }}/${{ env.REPO }}
-          git config user.name ${{ env.GIT_USERNAME }}
-          git config user.email ${{ env.EMAIL }}
-          git remote set-url origin git@github.com:${{ env.GIT_USERNAME }}/${{ env.REPO }}.git
-          echo "$GIT_DEPLOY_KEY" > ~/deploy_key.pem
-          chmod 600 ~/deploy_key.pem
+      # - name: Git config
+      #   env:
+      #     GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
+      #   run: |
+      #     cd ${{ env.HOME }}/${{ env.REPO }}
+      #     git config user.name ${{ env.GIT_USERNAME }}
+      #     git config user.email ${{ env.EMAIL }}
+      #     git remote set-url origin git@github.com:${{ env.GIT_USERNAME }}/${{ env.REPO }}.git
+      #     echo "$GIT_DEPLOY_KEY" > ~/deploy_key.pem
+      #     chmod 600 ~/deploy_key.pem
 
       # - name: Create a new branch
       #   run: |
       #     cd ${{ env.HOME }}/${{ env.REPO }}
       #     git switch -c deploy/${{ github.sha }}
+
+
+      - name: Checkout Kubernetes manifests repo
+        uses: actions/checkout@v3
+        with:
+          repository: dd-japan/emailservice-manifest
+          token: ${{ secrets.ACCESS_TOKEN }}
+          path: emailservice-manifest
+
       
       - name: Update emailservice manifest
         run: | 
