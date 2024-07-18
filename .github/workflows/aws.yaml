@@ -62,13 +62,13 @@ jobs:
   github:
     needs: push
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          repository: ${{ env.GIT_USERNAME }}/${{ env.REPO }}
-          path: ${{ env.REPO }}
-          ref: master
+    # steps:
+    #   - name: Checkout
+    #     uses: actions/checkout@v3
+    #     with:
+    #       repository: ${{ env.GIT_USERNAME }}/${{ env.REPO }}
+    #       path: ${{ env.REPO }}
+    #       ref: master
       
       # - name: Git config
       #   env:
