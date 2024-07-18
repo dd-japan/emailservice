@@ -59,33 +59,6 @@ jobs:
           docker build . --tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
   
-  github:
-    needs: push
-    runs-on: ubuntu-latest
-    # steps:
-    #   - name: Checkout
-    #     uses: actions/checkout@v3
-    #     with:
-    #       repository: ${{ env.GIT_USERNAME }}/${{ env.REPO }}
-    #       path: ${{ env.REPO }}
-    #       ref: master
-      
-      # - name: Git config
-      #   env:
-      #     GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
-      #   run: |
-      #     cd ${{ env.HOME }}/${{ env.REPO }}
-      #     git config user.name ${{ env.GIT_USERNAME }}
-      #     git config user.email ${{ env.EMAIL }}
-      #     git remote set-url origin git@github.com:${{ env.GIT_USERNAME }}/${{ env.REPO }}.git
-      #     echo "$GIT_DEPLOY_KEY" > ~/deploy_key.pem
-      #     chmod 600 ~/deploy_key.pem
-
-      # - name: Create a new branch
-      #   run: |
-      #     cd ${{ env.HOME }}/${{ env.REPO }}
-      #     git switch -c deploy/${{ github.sha }}
-
       # Checkout to manifest repo
       - name: Checkout Kubernetes manifests repo
         uses: actions/checkout@v3
@@ -112,3 +85,29 @@ jobs:
             git status
             git commit -m "Update image to public.ecr.aws/b1o7r7e0/emailservice:${{ env.IMAGE_TAG }}"
             git push origin master
+  # github:
+  #   needs: push
+  #   runs-on: ubuntu-latest
+    # steps:
+    #   - name: Checkout
+    #     uses: actions/checkout@v3
+    #     with:
+    #       repository: ${{ env.GIT_USERNAME }}/${{ env.REPO }}
+    #       path: ${{ env.REPO }}
+    #       ref: master
+      
+      # - name: Git config
+      #   env:
+      #     GIT_DEPLOY_KEY: ${{ secrets.GIT_DEPLOY_KEY }}
+      #   run: |
+      #     cd ${{ env.HOME }}/${{ env.REPO }}
+      #     git config user.name ${{ env.GIT_USERNAME }}
+      #     git config user.email ${{ env.EMAIL }}
+      #     git remote set-url origin git@github.com:${{ env.GIT_USERNAME }}/${{ env.REPO }}.git
+      #     echo "$GIT_DEPLOY_KEY" > ~/deploy_key.pem
+      #     chmod 600 ~/deploy_key.pem
+
+      # - name: Create a new branch
+      #   run: |
+      #     cd ${{ env.HOME }}/${{ env.REPO }}
+      #     git switch -c deploy/${{ github.sha }}
