@@ -66,15 +66,15 @@ jobs:
           repository: dd-japan/emailservice-manifest
           token: ${{ secrets.ACCESS_TOKEN }}
           path: emailservice-manifest
-
+          ref: master
+          
+      - name: List files for debugging
+        run: ls -R emailservice-manifest
       
       - name: Update emailservice manifest
         run: | 
           sed -i 's|image: public.ecr.aws/b1o7r7e0/emailservice:[^[:space:]]*|image: public.ecr.aws/b1o7r7e0/emailservice:${{ github.sha }}|g' emailservice-manifest/manifest/emailservice.yaml
           cat cat emailservice-manifest/manifest/emailservice.yaml
-
-      - name: List files for debugging
-        run: ls -R emailservice-manifest
       
       - name: Commit and push changes
         working-directory: emailservice-manifest
