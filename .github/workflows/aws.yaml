@@ -12,7 +12,7 @@ on:
 env:
   AWS_REGION: us-east-1                   # set this to your preferred AWS region, e.g. us-west-1
   ECR_REPOSITORY: b1o7r7e0/emailservice           # set this to your Amazon ECR repository name
-  HOME: /home/runner/work/emailservice/emailservice
+  # HOME: /home/runner/work/emailservice/emailservice
   REPO: emailservice-manifest
   GIT_USERNAME: dd-japan
   EMAIL: k.kyuta.821@gmail.com
@@ -97,9 +97,11 @@ jobs:
       
       - name: Update emailservice manifest
         run: | 
-          cd ${{ env.HOME }}/${{ env.REPO }}/manifest
           sed -i -e 's|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:.*|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:${{ github.sha }}|' emailservice.yaml
-          cat emailservice.yaml
+          cat cat emailservice-manifest/manifest/emailservice.yaml
+
+      - name: List files for debugging
+        run: ls -R emailservice-manifest
       
       - name: Commit and push changes
         working-directory: emailservice-manifest
