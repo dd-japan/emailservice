@@ -72,8 +72,9 @@ jobs:
       
       - name: Update emailservice manifest
         run: | 
-          sed -i 's|image: public.ecr.aws/b1o7r7e0/emailservice:[^[:space:]]*|image: public.ecr.aws/b1o7r7e0/emailservice:${{ env.IMAGE_TAG }}|g' emailservice-manifest/manifest/emailservice.yaml
-          cat cat emailservice-manifest/manifest/emailservice.yaml
+        IMAGE_TAG=${{ env.IMAGE_TAG }}
+        sed -i "s|image: public.ecr.aws/b1o7r7e0/emailservice:[^[:space:]]*|image: public.ecr.aws/b1o7r7e0/emailservice:${IMAGE_TAG}|g" emailservice-manifest/manifest/emailservice.yaml
+        cat emailservice-manifest/manifest/emailservice.yaml
       
       - name: Commit and push changes
         working-directory: emailservice-manifest
