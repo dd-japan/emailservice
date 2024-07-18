@@ -70,7 +70,7 @@ jobs:
       
       - name: Update emailservice manifest
         run: | 
-          sed -i -e 's|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:.*|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:${{ github.sha }}|' emailservice.yaml
+          sed -i -e 's|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:.*|601427279990.dkr.ecr.us-east-1.amazonaws.com/emailservice:${{ github.sha }}|' emailservice-manifest/manifest/emailservice.yaml
           cat cat emailservice-manifest/manifest/emailservice.yaml
 
       - name: List files for debugging
