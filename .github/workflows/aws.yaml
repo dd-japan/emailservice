@@ -66,7 +66,6 @@ jobs:
           repository: dd-japan/emailservice-manifest
           token: ${{ secrets.ACCESS_TOKEN }}
           path: emailservice-manifest
-          ref: master
           
       - name: List files for debugging
         run: ls -R emailservice-manifest
@@ -84,7 +83,7 @@ jobs:
             git add manifest/emailservice.yaml
             git status
             git commit -m "Update image to public.ecr.aws/b1o7r7e0/emailservice:${{ env.IMAGE_TAG }}"
-            git push origin master
+            git push origin main
   # github:
   #   needs: push
   #   runs-on: ubuntu-latest
